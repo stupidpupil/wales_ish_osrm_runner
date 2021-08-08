@@ -54,8 +54,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            *.osrm
-          key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-{{ hashFiles('gtfs_and_osm/*.osm.pbf') }}-v1
+            *.osrm*
+          key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-{{ hashFiles('gtfs_and_osm/*.osm.pbf') }}-v2
 
       - name: Process OSM
         run: |
