@@ -45,6 +45,7 @@ jobs:
         run: |
           curl -LJ https://github.com/stupidpupil/wales_ish_otp_graph/releases/latest/download/gtfs_and_osm.zip -o gtfs_and_osm.zip
           unzip gtfs_and_osm.zip
+          echo "disk=/tmp/stxxl,10G,syscall" > .stxxl
         shell: bash
 
       - name: Cache OSRM graph
@@ -57,7 +58,6 @@ jobs:
 
       - name: Process OSM
         run: |
-          cat "disk=/tmp/stxxl,10G,syscall" > .stxxl
           ln -s osrm-backend/profiles/lib lib
           osrm-backend/build/osrm-extract -p osrm-backend/profiles/car.lua gtfs_and_osm/*.osm.pbf
           osrm-contract *.osrm
