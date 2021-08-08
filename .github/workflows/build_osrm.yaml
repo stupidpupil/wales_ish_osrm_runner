@@ -12,8 +12,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - uses: actions/checkout@v2
-        repository: 'Project-OSRM/osrm-backend'
-        path: 'osrm-backend'
+        with:
+          repository: 'Project-OSRM/osrm-backend'
+          path: 'osrm-backend'
 
       - name: Get osrm-backend ref
         id: osrm-backend-ref
