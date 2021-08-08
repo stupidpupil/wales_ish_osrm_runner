@@ -61,5 +61,5 @@ jobs:
         if: steps.cache_osrm_graph.outputs.cache-hit != 'true'
         run: |
           ln -s osrm-backend/profiles/lib lib
-          osrm-backend/build/osrm-extract -p osrm-backend/profiles/car.lua gtfs_and_osm/wales-ish.osm.pbf
-          osrm-backend/build/osrm-contract gtfs_and_osm/wales-ish.osrm
+          osrm-backend/build/osrm-extract -p osrm-backend/profiles/car.lua gtfs_and_osm/wales_ish.osm.pbf
+          osrm-backend/build/osrm-contract gtfs_and_osm/wales_ish.osrm
