@@ -1,7 +1,7 @@
 on: 
   workflow_dispatch:
 
-name: build_osrm
+name: build_osrm_and_prepare_graph
 
 jobs:
   build_osrm:
@@ -39,3 +39,29 @@ jobs:
           cmake ../ -DENABLE_MASON=1
           make
           cd ../../
+        shell: bash
+
+      - name: Fetch OSM
+        run: |
+          curl -LJ https://github.com/stupidpupil/wales_ish_otp_graph/releases/latest/download/gtfs_and_osm.zip -o gtfs_and_osm.zip
+          unzip gtfs_and_osm.zip
+        shell: bash
+
+      - name: Cache OSRM graph
+        id: cache_osrm_graph
+        uses: actions/cache@v2
+        with:
+          path: |
+            *.osrm
+          key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-{{ hashFiles('gtfs_and_osm/*.osm.pbf') }}-v1
+
+      - name: Process OSM
+        run: |
+          cat "disk=/tmp/stxxl,10G,syscall" > .stxxl
+          ln -s osrm-backend/profiles/lib lib
+          osrm-backend/build/osrm-extract -p osrm-backend/profiles/car.lua gtfs_and_osm/*.osm.pbf
+          osrm-contract *.osrm
+
+
+
+
