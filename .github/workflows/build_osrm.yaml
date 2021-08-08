@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ~/osrm-backend/build
+            osrm-backend/build
           key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-v1
 
       - name: Build osrm-backend
@@ -38,7 +38,4 @@ jobs:
           cd build
           cmake ../ -DENABLE_MASON=1
           make
-
-      - name: Test ls
-        run: |
-          ls -l ~
+          cd ../../
