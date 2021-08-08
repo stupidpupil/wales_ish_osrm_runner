@@ -28,7 +28,7 @@ jobs:
         with:
           path: |
             ~/osrm-backend/build
-          key: ${{ runner.os }}-${{ stes.osrm-backend-ref.outputs.ref }}-v1
+          key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-v1
 
       - name: Build osrm-backend
         run: |
