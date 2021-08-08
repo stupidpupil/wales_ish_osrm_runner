@@ -4,7 +4,7 @@ on:
 name: build_osrm_and_prepare_graph
 
 jobs:
-  build_osrm:
+  build_osrm_and_prepare_graph:
     runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
