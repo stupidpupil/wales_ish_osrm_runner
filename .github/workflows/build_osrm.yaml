@@ -31,7 +31,7 @@ jobs:
           key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-v1
 
       - name: Install dependencies
-        if: runner.os == 'macOS' & steps.cache_osrm_backend_build.outputs.cache-hit != 'true'
+        if: runner.os == 'macOS' && steps.cache_osrm_backend_build.outputs.cache-hit != 'true'
         run: |
           brew install boost git cmake libzip libxml2 lua tbb ccache
 
