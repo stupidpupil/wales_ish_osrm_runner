@@ -57,12 +57,9 @@ jobs:
             *.osrm*
           key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-{{ hashFiles('gtfs_and_osm/*.osm.pbf') }}-v2
 
-      - name: Process OSM
+      - name: Process OSM to OSRM graph
+        if: steps.cache_osrm_graph.outputs.cache-hit != 'true'
         run: |
           ln -s osrm-backend/profiles/lib lib
           osrm-backend/build/osrm-extract -p osrm-backend/profiles/car.lua gtfs_and_osm/*.osm.pbf
-          osrm-contract *.osrm
-
-
-
-
+          osrm-backend/build/osrm-contract *.osrm
