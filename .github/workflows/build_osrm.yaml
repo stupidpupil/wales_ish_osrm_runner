@@ -31,7 +31,7 @@ jobs:
           key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-v1
 
       - name: Build osrm-backend
-        #if: steps.cache_osrm_backend_build.outputs.cache-hit != 'true'
+        if: steps.cache_osrm_backend_build.outputs.cache-hit != 'true'
         run: |
           cd osrm-backend
           mkdir build
