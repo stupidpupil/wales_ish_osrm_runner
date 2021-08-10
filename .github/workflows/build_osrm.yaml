@@ -63,3 +63,22 @@ jobs:
           ln -s osrm-backend/profiles/lib lib
           osrm-backend/build/osrm-extract -p osrm-backend/profiles/car.lua gtfs_and_osm/wales_ish.osm.pbf
           osrm-backend/build/osrm-contract gtfs_and_osm/wales_ish.osrm
+
+      - name: Run OSRM and issue query
+        run: |
+          osrm-backend/build/osrm-routed --max-table-size=2000 --algorithm ch gtfs_and_osm/wales_ish.osrm &
+          sleep 60
+          COORDS=$(cat coords.txt)
+          OSRM_URL="http://127.0.0.1:5000//table/v1/driving/$COORDS"
+          curl $OSRM_URL -o "output.json"
+        shell: bash
+
+
+      - name: Upload output artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: output.json
+          path: output.json
+          if-no-files-found: error
+
+
