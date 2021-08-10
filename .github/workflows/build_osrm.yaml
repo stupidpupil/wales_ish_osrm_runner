@@ -69,7 +69,7 @@ jobs:
           osrm-backend/build/osrm-routed --max-table-size=2000 --algorithm ch gtfs_and_osm/wales_ish.osrm &
           sleep 60
           COORDS=$(cat coords.txt)
-          OSRM_URL="http://127.0.0.1:5000//table/v1/driving/$COORDS"
+          OSRM_URL="http://127.0.0.1:5000/table/v1/driving/$COORDS"
           curl $OSRM_URL -o "output.json"
         shell: bash
 
