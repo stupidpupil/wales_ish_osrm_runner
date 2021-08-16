@@ -97,7 +97,16 @@ jobs:
           produce_coords()
         shell: Rscript {0}
 
+      - name: Cache output.json
+        id: cache_output_json
+        uses: actions/cache@v2
+        with:
+          path: |
+            data/output.json
+          key: ${{ steps.osrm-backend-ref.outputs.ref }}-${{ hashFiles('gtfs_and_osm/*.osrm*') }}-${{ hashFiles('data/coords.txt') }}-v1
+
       - name: Run OSRM and issue query
+        if: steps.cache_output_json.outputs.cache-hit != 'true'
         run: |
           osrm-backend/build/osrm-routed --max-table-size=2000 --algorithm ch gtfs_and_osm/wales_ish.osrm &
           sleep 60
