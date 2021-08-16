@@ -11,6 +11,29 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: r-lib/actions/setup-r@v1
+        if: steps.cache_osm.outputs.cache-hit != 'true'
+
+      - name: Query dependencies
+        run: |
+          install.packages('remotes')
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+        shell: Rscript {0}
+
+      - name: Restore R package cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+
+      - name: Install dependencies
+        run: |
+          install.packages(c("devtools"))
+          devtools::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+
       - uses: actions/checkout@v2
         with:
           repository: 'Project-OSRM/osrm-backend'
@@ -64,21 +87,42 @@ jobs:
           osrm-backend/build/osrm-extract -p osrm-backend/profiles/car.lua gtfs_and_osm/wales_ish.osm.pbf
           osrm-backend/build/osrm-contract gtfs_and_osm/wales_ish.osrm
 
+      - name: Download trip points
+        run: |
+          curl https://raw.githubusercontent.com/stupidpupil/wales_lsoa_trip_points/main/data/lsoa11_nearest_road_points.geojson -o data/lsoa11_nearest_road_points.geojson
+
+      - name: Produce coords.txt
+        run: |
+          devtools::load_all()
+          produce_coords()
+        shell: Rscript {0}
+
       - name: Run OSRM and issue query
         run: |
           osrm-backend/build/osrm-routed --max-table-size=2000 --algorithm ch gtfs_and_osm/wales_ish.osrm &
           sleep 60
-          COORDS=$(cat coords.txt)
+          COORDS=$(cat data/coords.txt)
           OSRM_URL="http://127.0.0.1:5000/table/v1/driving/$COORDS"
-          curl $OSRM_URL -o "output.json"
+          curl $OSRM_URL -o "data/output.json"
         shell: bash
-
 
       - name: Upload output artifact
         uses: actions/upload-artifact@v2
         with:
           name: output.json
-          path: output.json
+          path: data/output.json
           if-no-files-found: error
 
+      - name: Produce travel-time matrix
+        run: |
+          devtools::load_all()
+          translate_osrm_json_to_matrix() %>% write_csv("data/matrix.csv")
+        shell: Rscript {0}
+
+      - name: Upload matrix artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: matrix.csv
+          path: data/matrix.csv
+          if-no-files-found: error
 
