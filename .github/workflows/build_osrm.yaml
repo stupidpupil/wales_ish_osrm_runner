@@ -78,7 +78,7 @@ jobs:
         with:
           path: |
             gtfs_and_osm/*.osrm*
-          key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-${{ hashFiles('gtfs_and_osm/*.osm.pbf') }}-v2
+          key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-${{ hashFiles('gtfs_and_osm/*.osm.pbf', 'data-raw/car_gb.lua') }}-v2
 
       - name: Process OSM to OSRM graph
         if: steps.cache_osrm_graph.outputs.cache-hit != 'true'
