@@ -6,7 +6,7 @@ translate_osrm_json_to_matrix <- function(){
 
   colnames(duration_seconds) <- lsoa_trip_points$LSOA11CD
   duration_seconds %>%
+    mutate_all(~ as.integer(./60)) %>%
     mutate(from_id = lsoa_trip_points$LSOA11CD) %>%
     relocate(from_id)
-
 }
