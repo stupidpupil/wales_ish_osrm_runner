@@ -10,3 +10,4 @@ translate_osrm_json_to_matrix <- function(){
     mutate(from_id = lsoa_trip_points$LSOA11CD) %>%
     relocate(from_id)
 }
+

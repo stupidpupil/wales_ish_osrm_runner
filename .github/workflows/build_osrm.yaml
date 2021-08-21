@@ -126,13 +126,13 @@ jobs:
       - name: Produce travel-time matrix
         run: |
           devtools::load_all()
-          translate_osrm_json_to_matrix() %>% write_csv("data/matrix.csv")
+          write_osrm_matrix()
         shell: Rscript {0}
 
       - name: Upload matrix artifact
         uses: actions/upload-artifact@v2
         with:
           name: matrix.csv
-          path: data/matrix.csv
+          path: output/arrive_by_0900_driving.csv
           if-no-files-found: error
 
