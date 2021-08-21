@@ -136,3 +136,23 @@ jobs:
           path: output/arrive_by_0900_driving.csv
           if-no-files-found: error
 
+      - name: Checkout matrix-releases branch
+        uses: actions/checkout@v2
+        with:
+          ref: matrix-releases
+          path: matrix-releases
+
+      - name: Copy matrices and commit
+        run: |
+          cd matrix-releases
+          rm -f *.csv
+          rm -f index.json
+          cp ../output/*.csv .
+          cp ../output/index.json .
+          git config user.name "Graph Release Bot"
+          git config user.email "<>"
+          git add .
+          git commit -m "Updated for new release"
+          git push origin matrix-releases
+          cd ..
+
