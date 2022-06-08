@@ -21,6 +21,9 @@ The table below shows the speeds and how they're mapped on to [OpenStreetMap's `
 | Local street                        | unclassified, residential | 18.3 | 11.4 |
 | Private road -<br>restricted access | service                   | 15.3 | 9.5  |
 
+## Parking etc.
+The travel times do _not_ include any estimates for finding somewhere to park or the process of parking.
+
 # Licence
 
 These driving-time travel time matrices are made available under the [ODbL v1.0](https://opendatacommons.org/licenses/odbl/1-0/) by Adam Watkins.
