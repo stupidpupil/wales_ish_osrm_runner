@@ -64,8 +64,8 @@ jobs:
           make
           cd ../../
         shell: bash
-        
-      - name: Produce coords.txt
+
+      - name: Fetch OSRM graph
         run: |
           devtools::load_all()
           fetch_osrm_graph()
