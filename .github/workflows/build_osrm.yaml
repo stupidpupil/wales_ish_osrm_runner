@@ -80,14 +80,12 @@ jobs:
             gtfs_and_osm/*.osrm*
           key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-${{ hashFiles('gtfs_and_osm/*.osm.pbf', 'data-raw/car_gb.lua') }}-v2
 
-      - name: Process OSM to OSRM graph
-        if: steps.cache_osrm_graph.outputs.cache-hit != 'true'
+      - name: Produce coords.txt
         run: |
-          ln -s osrm-backend/profiles/lib lib
-          cp data-raw/car_gb.lua osrm-backend/profiles/car.lua
-          osrm-backend/build/osrm-extract -p osrm-backend/profiles/car.lua gtfs_and_osm/walesish.osm.pbf
-          osrm-backend/build/osrm-contract gtfs_and_osm/walesish.osrm
-
+          devtools::load_all()
+          fetch_osrm_graph()
+        shell: Rscript {0}
+        
       - name: Download trip points
         run: |
           curl https://raw.githubusercontent.com/stupidpupil/wales_lsoa_trip_points/points-releases/lsoa11_nearest_road_points.geojson -o data/lsoa11_nearest_road_points.geojson
@@ -109,7 +107,7 @@ jobs:
       - name: Run OSRM and issue query
         if: steps.cache_output_json.outputs.cache-hit != 'true'
         run: |
-          osrm-backend/build/osrm-routed --max-table-size=3000 --algorithm ch gtfs_and_osm/walesish.osrm &
+          osrm-backend/build/osrm-routed --max-table-size=3000 --algorithm ch data-raw/osrm_driving/walesish.osrm &
           sleep 60
           COORDS=$(cat data/coords.txt)
           OSRM_URL="http://127.0.0.1:5000/table/v1/driving/$COORDS"
