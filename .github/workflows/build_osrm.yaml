@@ -72,20 +72,12 @@ jobs:
           echo "disk=/tmp/stxxl,10G,syscall" > .stxxl
         shell: bash
 
-      - name: Cache OSRM graph
-        id: cache_osrm_graph
-        uses: actions/cache@v2
-        with:
-          path: |
-            gtfs_and_osm/*.osrm*
-          key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-${{ hashFiles('gtfs_and_osm/*.osm.pbf', 'data-raw/car_gb.lua') }}-v2
-
       - name: Produce coords.txt
         run: |
           devtools::load_all()
           fetch_osrm_graph()
         shell: Rscript {0}
-        
+
       - name: Download trip points
         run: |
           curl https://raw.githubusercontent.com/stupidpupil/wales_lsoa_trip_points/points-releases/lsoa11_nearest_road_points.geojson -o data/lsoa11_nearest_road_points.geojson
@@ -102,7 +94,7 @@ jobs:
         with:
           path: |
             data/output.json
-          key: ${{ steps.osrm-backend-ref.outputs.ref }}-${{ hashFiles('gtfs_and_osm/*.osrm*') }}-${{ hashFiles('data/coords.txt') }}-v2
+          key: ${{ steps.osrm-backend-ref.outputs.ref }}-${{ hashFiles('data-raw/osrm_driving/*.osrm*') }}-${{ hashFiles('data/coords.txt') }}-v2
 
       - name: Run OSRM and issue query
         if: steps.cache_output_json.outputs.cache-hit != 'true'
