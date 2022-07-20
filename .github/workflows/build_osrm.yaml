@@ -64,14 +64,7 @@ jobs:
           make
           cd ../../
         shell: bash
-
-      - name: Fetch OSM
-        run: |
-          curl -LJ https://github.com/stupidpupil/wales_ish_otp_graph/releases/latest/download/gtfs_and_osm.zip -o gtfs_and_osm.zip
-          unzip gtfs_and_osm.zip
-          echo "disk=/tmp/stxxl,10G,syscall" > .stxxl
-        shell: bash
-
+        
       - name: Produce coords.txt
         run: |
           devtools::load_all()
