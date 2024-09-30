@@ -9,10 +9,9 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: r-lib/actions/setup-r@v2
-        if: steps.cache_osm.outputs.cache-hit != 'true'
 
       - name: Query dependencies
         run: |
@@ -22,7 +21,7 @@ jobs:
         shell: Rscript {0}
 
       - name: Restore R package cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.R_LIBS_USER }}
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
@@ -45,58 +44,14 @@ jobs:
         run: |
           echo "ref=$(git -C osrm-backend rev-parse HEAD)" >> $GITHUB_OUTPUT
         shell: bash
-
-      - name: Cache osrm-backend/build
-        id: cache_osrm_backend_build
-        uses: actions/cache@v4
-        with:
-          path: |
-            osrm-backend/build
-            osrm-backend/mason_packages
-          key: ${{ runner.os }}-${{ steps.osrm-backend-ref.outputs.ref }}-osrm-v2
-          
-      - name: Build osrm-backend
-        if: steps.cache_osrm_backend_build.outputs.cache-hit != 'true'
+ 
+      - name: Download osrm
         run: |
-          cd osrm-backend
-          rm -rf build
-          mkdir build
-          cd build
-          cmake ../ -DENABLE_MASON=1
-          make
-          cd ../../
-        shell: bash
+          wget "https://github.com/Project-OSRM/osrm-backend/releases/download/v5.27.1/node_osrm-v5.27.1-node-v108-darwin-arm64-Release.tar.gz"
+          tar xvf node_osrm-v5.27.1-node-v108-darwin-arm64-Release.tar.gz
 
-      - name: Clean osrm-backend
-        run: |
-          rm -rf osrm-backend/build/CMakeFiles
-          rm -rf osrm-backend/build/libosrm*
-          rm -rf osrm-backend/build/flatbuffers-build
-          rm -rf osrm-backend/mason_packages/headers/
-          rm -rf osrm-backend/mason_packages/.binaries/
-          rm -rf osrm-backend/third_party/
-          rm -rf osrm-backend/unit_tests/
-          rm -rf osrm-backend/src/
-          rm -rf osrm-backend/docs/
-          rm -rf osrm-backend/features/
-          rm -rf osrm-backend/include/
-          rm -rf osrm-backend/test/
-          rm -rf osrm-backend/.git
-          rm -rf osrm-backend/.github
-          find osrm-backend -name "*.c" -type f -delete
-          find osrm-backend -name "*.cc" -type f -delete
-          find osrm-backend -name "*.h" -type f -delete
-          find osrm-backend -name "*.cpp" -type f -delete
-          find osrm-backend -name "*.hpp" -type f -delete
-          find osrm-backend -name "*.py" -type f -delete
-          find osrm-backend -name "*.md" -type f -delete
-          find osrm-backend -name "*.rst" -type f -delete
-          find osrm-backend -name "*.txt" -type f -delete
-          find osrm-backend -name "*.pbf" -type f -delete
-          find osrm-backend -name "*.rs" -type f -delete
-          find osrm-backend -name "*.png" -type f -delete
-          find osrm-backend -name "*.jpg" -type f -delete
-        shell: bash
+      - name: Add osrm to path
+        run: echo "$PWD/binding" >> $GITHUB_PATH
 
       - name: Fetch OSRM graph
         run: |
@@ -116,7 +71,7 @@ jobs:
 
       - name: Cache output.json
         id: cache_output_json
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             data/output.json
@@ -125,7 +80,7 @@ jobs:
       - name: Run OSRM and issue query
         if: steps.cache_output_json.outputs.cache-hit != 'true'
         run: |
-          osrm-backend/build/osrm-routed --max-table-size=3000 --algorithm ch data-raw/osrm_driving/walesish.osrm &
+          osrm-routed --max-table-size=3000 --algorithm ch data-raw/osrm_driving/walesish.osrm &
           sleep 60
           COORDS=$(cat data/coords.txt)
           OSRM_URL="http://127.0.0.1:5000/table/v1/driving/$COORDS"
@@ -133,7 +88,7 @@ jobs:
         shell: bash
 
       - name: Upload output artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: output.json
           path: data/output.json
@@ -146,14 +101,14 @@ jobs:
         shell: Rscript {0}
 
       - name: Upload matrix artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: matrix.csv
           path: output/arrive_by_0900_driving.csv
           if-no-files-found: error
 
       - name: Checkout matrix-releases branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: matrix-releases
           path: matrix-releases
@@ -171,4 +126,3 @@ jobs:
           git commit -m "Updated for new release"
           git push origin matrix-releases
           cd ..
-
